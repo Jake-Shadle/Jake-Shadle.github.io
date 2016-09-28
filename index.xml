@@ -2,20 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Jake&#39;s Blog</title>
-    <link>http://Jake-Shadle.github.io/</link>
+    <link>https://jake-shadle.github.io/</link>
     <description>Recent content on Jake&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-EN</language>
     <copyright>(c) 2016 Jake Shadle.</copyright>
     <lastBuildDate>Wed, 28 Sep 2016 19:38:21 +0000</lastBuildDate>
-    <atom:link href="http://Jake-Shadle.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://jake-shadle.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Trying out this blogging thing</title>
-      <link>http://jake-shadle.github.io/2016/09/28/trying-out-this-blogging-thing/</link>
+      <link>https://jake-shadle.github.io/2016/09/28/trying-out-this-blogging-thing/</link>
       <pubDate>Wed, 28 Sep 2016 19:38:21 +0000</pubDate>
       
-      <guid>http://jake-shadle.github.io/2016/09/28/trying-out-this-blogging-thing/</guid>
+      <guid>https://jake-shadle.github.io/2016/09/28/trying-out-this-blogging-thing/</guid>
       <description>&lt;p&gt;Though I have enjoyed reading coding blogs for years now, I have never thought seriously about doing my own, most
 probably because the main language I use is &lt;strong&gt;C++&lt;/strong&gt;, which doesn&amp;rsquo;t really inspire me, to say the least.&lt;/p&gt;
 
@@ -59,10 +59,10 @@ keep &lt;strong&gt;C++&lt;/strong&gt; snark to a minimum, but I have used the la
     
     <item>
       <title>About</title>
-      <link>http://jake-shadle.github.io/about/</link>
+      <link>https://jake-shadle.github.io/about/</link>
       <pubDate>Mon, 28 Jul 2014 11:14:25 +0000</pubDate>
       
-      <guid>http://jake-shadle.github.io/about/</guid>
+      <guid>https://jake-shadle.github.io/about/</guid>
       <description>&lt;p&gt;Programmer on Frostbite doing all the stuff that you never see nor hear.&lt;/p&gt;
 </description>
     </item>
