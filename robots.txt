@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jake-shadle.github.io/sitemap.xml
