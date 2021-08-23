@@ -409,6 +409,15 @@
 </span><span style="color:#5c6370;"># These are separate since docker/podman won&#39;t transform environment variables defined in the same ENV block
 </span><span style="color:#dcdfe4;">ENV CFLAGS_x86_64_pc_windows_msvc=&quot;$CL_FLAGS&quot; \
     CXXFLAGS_x86_64_pc_windows_msvc=&quot;$CL_FLAGS&quot;
+</span></code></pre>
+<p>As already noted above in the reasons why we went <a href="https://jake-shadle.github.io/xwin/#how">this route</a>, we use <code>lld-link</code> even when compiling on Windows hosts due to its superior speed over <code>link.exe</code>. So for our project we just set it in our <a href="https://doc.rust-lang.org/cargo/reference/config.html#targettriplelinker">.cargo/config.toml</a> so it's used regardless of host platform.</p>
+<pre style="background-color:#282c34;">
+<code class="language-ini" data-lang="ini"><span style="color:#c678dd;">[target.x86_64-pc-windows-msvc]
+</span><span style="color:#e06c75;">linker </span><span style="color:#c678dd;">= </span><span style="color:#98c379;">&quot;lld-link&quot; </span><span style="color:#5c6370;"># Note the lack of extension, which means it will work on both Windows and unix style platforms
+</span></code></pre>
+<p>If you don't already use <code>lld-link</code> when targeting Windows, you'll need to add an additional environment variable so that cargo knows what linker to use, otherwise it will default to <code>link.exe</code>.</p>
+<pre style="background-color:#282c34;">
+<code class="language-dockerfile" data-lang="dockerfile"><span style="color:#dcdfe4;">ENV CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER=lld-link
 </span></code></pre><h3 id="5-profit">5. Profit</h3>
 <p>Building a container image from this Dockerfile spec should give allow you to run containers capable of compiling and linking a Rust project targeting Windows, including any C/C++ code that might be used as a dependency....<a href="https://jake-shadle.github.io/xwin/#common-issues">mostly</a>.</p>
 <pre style="background-color:#282c34;">
@@ -514,6 +523,9 @@
     # doesn&#39;t implement all of the options supported by cl, but the ones it doesn&#39;t
     # are _generally_ not interesting.
 </span><span style="color:#dcdfe4;">    CL_FLAGS=&quot;-Wno-unused-command-line-argument -fuse-ld=lld-link /imsvc/xwin/crt/include /imsvc/xwin/sdk/include/ucrt /imsvc/xwin/sdk/include/um /imsvc/xwin/sdk/include/shared&quot; \
+    </span><span style="color:#5c6370;"># Let cargo know what linker to invoke if you haven&#39;t already specified it
+    # in a .cargo/config.toml file
+</span><span style="color:#dcdfe4;">    CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER=&quot;lld-link&quot; \
     RUSTFLAGS=&quot;-Lnative=/xwin/crt/lib/x86_64 -Lnative=/xwin/sdk/lib/um/x86_64 -Lnative=/xwin/sdk/lib/ucrt/x86_64&quot;
 
 </span><span style="color:#5c6370;"># These are separate since docker/podman won&#39;t transform environment variables defined in the same ENV block
