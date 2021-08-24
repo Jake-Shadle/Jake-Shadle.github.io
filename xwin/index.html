@@ -382,7 +382,7 @@
 <p>We have two basic options for how we could get the CRT and SDK, either run <code>xwin</code> directly during image building, or run it separately and tarball the files and upload them to something like <a href="https://cloud.google.com/storage">GCS</a> and just retrieve them as needed in the future. We'll just use it directly while building the image since that's easier.</p>
 <pre style="background-color:#282c34;">
 <code class="language-dockerfile" data-lang="dockerfile"><span style="color:#dcdfe4;">RUN set -eux; \
-    xwin_version=&quot;0.1.0&quot;; \
+    xwin_version=&quot;0.1.1&quot;; \
     xwin_prefix=&quot;xwin-$xwin_version-x86_64-unknown-linux-musl&quot;; \
     </span><span style="color:#5c6370;"># Install xwin to cargo/bin via github release. Note you could also just use `cargo install xwin`.
 </span><span style="color:#dcdfe4;">    curl --fail -L https://github.com/Jake-Shadle/xwin/releases/download/$xwin_version/$xwin_prefix.tar.gz | tar -xzv -C /usr/local/cargo/bin --strip-components=1 $xwin_prefix/xwin; \
@@ -500,7 +500,7 @@
 </span><span style="color:#c678dd;">RUN </span><span style="color:#dcdfe4;">rustup target add x86_64-pc-windows-msvc
 
 </span><span style="color:#c678dd;">RUN </span><span style="color:#dcdfe4;">set -eux; \
-    xwin_version=&quot;0.1.0&quot;; \
+    xwin_version=&quot;0.1.1&quot;; \
     xwin_prefix=&quot;xwin-$xwin_version-x86_64-unknown-linux-musl&quot;; \
     </span><span style="color:#5c6370;"># Install xwin to cargo/bin via github release. Note you could also just use `cargo install xwin`.
 </span><span style="color:#dcdfe4;">    curl --fail -L https://github.com/Jake-Shadle/xwin/releases/download/$xwin_version/$xwin_prefix.tar.gz | tar -xzv -C /usr/local/cargo/bin --strip-components=1 $xwin_prefix/xwin; \
@@ -538,7 +538,7 @@
 </span></code></pre>
 <p>Here is a <a href="https://gist.github.com/Jake-Shadle/542dfa000a37c4d3c216c976e0fbb973">gist</a> with the same dockerfile, and an example of how you can build it. I'm using <code>podman</code> here, but <code>docker</code> should also work.</p>
 <pre style="background-color:#282c34;">
-<code class="language-sh" data-lang="sh"><span style="color:#e06c75;">curl --fail -L -o</span><span style="color:#dcdfe4;"> xwin.dockerfile https://gist.githubusercontent.com/Jake-Shadle/542dfa000a37c4d3c216c976e0fbb973/raw/e5d80534beb5d8db2fab0e5a22dce14111749d45/xwin.dockerfile
+<code class="language-sh" data-lang="sh"><span style="color:#e06c75;">curl --fail -L -o</span><span style="color:#dcdfe4;"> xwin.dockerfile https://gist.githubusercontent.com/Jake-Shadle/542dfa000a37c4d3c216c976e0fbb973/raw/bf6cff2bd4ad776d3def8520adb5a5c657140a9f/xwin.dockerfile
 </span><span style="color:#e06c75;">podman -t</span><span style="color:#dcdfe4;"> xwin</span><span style="color:#e06c75;"> -f</span><span style="color:#dcdfe4;"> xwin.dockerfile .
 </span></code></pre><h2 id="common-issues">Common issues</h2>
 <p>Unfortunately, everything is not sunshine and unicorns where cross compiling is concerned, but all of them are solvable, at least in principle.</p>
