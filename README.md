@@ -1,2 +1,3 @@
 # Jake-Shadle.github.io
-We get it
+
+Blog artifacts. Sources located at [blog_source](https://github.com/Jake-Shadle/blog_source).
