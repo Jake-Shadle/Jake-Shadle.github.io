@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <!-- Enable responsiveness on mobile devices-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+    <title>
+        Crash reporting in Rust
+    </title>
+
+    
+
+<link id="slate" class="stylesheet" rel="stylesheet"
+    href="https:&#x2F;&#x2F;jake-shadle.github.io&#x2F;slate.css" />
+
+
+    <!-- This script must follow css -->
+    
+
+    
+
+    
+
+    
+    
+
+    <noscript>
+        <style>
+            .navbar-menu {
+                display: block;
+            }
+
+            .js-only {
+                display: none;
+            }
+        </style>
+    </noscript>
+    
+</head>
+
+<body>
+    
+    
+<!-- START NAV -->
+
+
+    
+
+<header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                
+                <a class="navbar-item" href="/">
+                    
+                    <span>Home</span>
+                    
+                </a>
+                
+                <span class="navbar-burger burger" data-target="navbarMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </div>
+            <div id="navbarMenu" class="navbar-menu">
+                <div class="navbar-end">
+                    
+                    
+                    
+                    
+                    <a itemprop="url"
+                        class="navbar-item "
+                        href="https:&#x2F;&#x2F;jake-shadle.github.io&#x2F;categories">
+                        <span itemprop="name">Categories
+                        </span>
+                    </a>
+                    
+                    
+                    
+                    <a itemprop="url"
+                        class="navbar-item "
+                        href="https:&#x2F;&#x2F;jake-shadle.github.io&#x2F;tags">
+                        <span itemprop="name">Tags
+                        </span>
+                    </a>
+                    
+                    
+                    
+                    <a itemprop="url"
+                        class="navbar-item "
+                        href="https:&#x2F;&#x2F;github.com&#x2F;Jake-Shadle">
+                        <span itemprop="name">Github
+                        </span>
+                    </a>
+                    
+                    
+                    
+                    <a itemprop="url"
+                        class="navbar-item "
+                        href="https:&#x2F;&#x2F;twitter.com&#x2F;Ca1ne">
+                        <span itemprop="name">Twitter
+                        </span>
+                    </a>
+                    
+                    
+
+                    
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+
+    
+
+<!-- END NAV -->
+<main>
+    <section class="container">
+        <div class="columns is-desktop">
+            <div class="column is-10-desktop is-offset-1-desktop">
+                <article itemscope itemtype="http://schema.org/BlogPosting">
+                    <div class="card article">
+                        <div class="card-content">
+                            
+<header>
+    <div class="has-text-centered">
+        <a href="https://jake-shadle.github.io/crash-reporting/">
+            <p class="title article-title">Crash reporting in Rust
+            </p>
+        </a>
+        <div class="tags has-addons level-item">
+            <span class="tag is-rounded">2022-05-23</span>
+                       
+            <span class="tag is-rounded">
+<svg class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round"
+    stroke-linejoin="round" stroke-width="6.25%">
+    <circle cx="16" cy="16" r="14" />
+    <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>&nbsp;40 minute read</span>
+</span>
+        </div>
+    </div>
+</header>
+
+                            <div itemprop="articleBody" class="content article-body">
+                                
+                                <ul>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#introduction">Introduction</a>
+                                        
+                                        <ul>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#disclaimer">Disclaimer</a>
+                                            </li>
+                                            
+                                        </ul>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#why-we-need-crash-reporting">Why we need crash reporting</a>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#background">Background</a>
+                                        
+                                        <ul>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#consistent-generation">Consistent generation</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#consistent-analysis">Consistent analysis</a>
+                                            </li>
+                                            
+                                        </ul>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#why-not-just-use-breakpad-crashpad">Why not just...use Breakpad&#x2F;Crashpad?</a>
+                                        
+                                        <ul>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#modular">Modular</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#clean">Clean</a>
+                                            </li>
+                                            
+                                        </ul>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#implementation">Implementation</a>
+                                        
+                                        <ul>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#crash-handler">crash-handler</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#minidumper">minidumper</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#minidump-writer">minidump-writer</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#crash-context">crash-context</a>
+                                            </li>
+                                            
+                                            <li>
+                                                <a href="https://jake-shadle.github.io/crash-reporting/#sadness-generator">sadness-generator</a>
+                                            </li>
+                                            
+                                        </ul>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#next-steps">Next steps</a>
+                                        
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="https://jake-shadle.github.io/crash-reporting/#thanks">Thanks</a>
+                                        
+                                    </li>
+                                    
+                                </ul>
+                                
+                                <h2 id="introduction">Introduction</h2>
+<p>In this post I'll be talking about recent work I and others have done to make crash handling and reporting in Rust a (fairly) straightforward procedure by introducing several new crates that can be used in conjunction with each other, or with other crates you may already have. Keep in mind that some of the crates and details I'll be talking about might change as it is still early days, but the broad strokes <em>should</em> stay true even if you're reading this blog post a couple of years in the future.</p>
+<h3 id="disclaimer">Disclaimer</h3>
+<p>I'm going to be using some salty language in this post with regards to Apple, so fair warning if you are uncomfortable with that. I've tried to mostly keep it in a single rant section below that you can skip, but just wanted to give warning. Sorry, they just bring it out of me.</p>
+<h2 id="why-we-need-crash-reporting">Why we need crash reporting</h2>
+<p>Even though Rust has absolutely delivered on its promise of avoiding or eliminating entire classes of bugs and crashes (mostly at compile time!) that plague non-memory safe languages like C and C++, the truth is that crashes still happen in Rust projects.</p>
+<p>One of the biggest sources for crashes in a Rust project is that, even if a vast majority of code is in Rust, it's almost certain you have at least a few dependencies with code written in C, C++, or event assembly, not even counting the giant dependency of your OS if you are targeting a non-embedded environment. And while the Rust ecosystem is <a href="https://github.com/Byron/gitoxide">slowly</a> <a href="https://github.com/DoumanAsh/xxhash-rust">rewriting</a> <a href="https://github.com/KillingSpark/zstd-rs">C libraries</a> in Rust, this is a Sysiphean task.</p>
+<p>The second most likely source of crashes is naturally <code>unsafe</code> code. Generally speaking, the biggest reason for <code>unsafe</code> in most projects is for bridging the gap between regular Rust code and the aforementioned non-Rust dependencies, which can itself be a source of <a href="https://github.com/rust-lang/git2-rs/issues/813">bugs/crashes</a> on top of the foreign code it is interfacing with. In addition, <code>unsafe</code> is still needed for doing <a href="https://github.com/rust-lang/rust/blob/4ca19e09d302a4cbde14f9cb1bc109179dc824cd/library/core/src/slice/mod.rs#L1572-L1577">operations</a> that normal Rust would not allow due to the restrictions of the language.</p>
+<p>And even though the above potential sources of crashes will cover a vast majority of crash sources that can occur in a normal Rust program, the truth is that we as programmers just make mistakes that can make it past rustc, clippy, and whatever other processes could be in place to prevent them like static analysis and fuzzing, and crashes will occur that you want to know about so that you can fix them.</p>
+<pre style="background-color:#282c34;">
+<code class="language-rust" data-lang="rust"><span style="color:#c678dd;">fn </span><span style="color:#61afef;">how_to_stack_overflow_with_one_weird_trick</span><span style="color:#dcdfe4;">() {
+    </span><span style="color:#c678dd;">let mut</span><span style="color:#dcdfe4;"> big_boi </span><span style="color:#c678dd;">= </span><span style="color:#dcdfe4;">[</span><span style="color:#e5c07b;">0</span><span style="color:#c678dd;">u8</span><span style="color:#dcdfe4;">; </span><span style="color:#e5c07b;">999 </span><span style="color:#c678dd;">* </span><span style="color:#e5c07b;">1024 </span><span style="color:#c678dd;">* </span><span style="color:#e5c07b;">1024</span><span style="color:#dcdfe4;">];
+    big_boi[big_boi.</span><span style="color:#61afef;">len</span><span style="color:#dcdfe4;">() </span><span style="color:#c678dd;">- </span><span style="color:#e5c07b;">1</span><span style="color:#dcdfe4;">] </span><span style="color:#c678dd;">= </span><span style="color:#e5c07b;">1</span><span style="color:#dcdfe4;">;
+
+    println!(</span><span style="color:#98c379;">&quot;</span><span style="color:#e5c07b;">{:?}</span><span style="color:#98c379;">&quot;</span><span style="color:#dcdfe4;">, </span><span style="color:#c678dd;">&amp;</span><span style="color:#dcdfe4;">big_boi[big_boi.</span><span style="color:#61afef;">len</span><span style="color:#dcdfe4;">() </span><span style="color:#c678dd;">- </span><span style="color:#e5c07b;">20</span><span style="color:#c678dd;">..</span><span style="color:#dcdfe4;">]);
+}
+</span></code></pre><h2 id="background">Background</h2>
+<p>Some of you reading this post will immediately have thought about crash reporting solutions that already exist, and chances are fairly good that the set included <a href="https://chromium.googlesource.com/breakpad/breakpad/">Breakpad</a> (and/or perhaps its younger sibling <a href="https://chromium.googlesource.com/crashpad/crashpad/">Crashpad</a>). Even if you've never heard of these projects, it's almost guaranteed that you have been a passive user of them, as they are the backbone of crash reporting in Firefox and Chrome, and probably other software I'm unaware of. We'll just focus on Breakpad since it came first, and it's vastly simpler than its <a href="https://en.wikipedia.org/wiki/Second-system_effect">over-engineered</a> (IMO) successor Crashpad.</p>
+<p>Breakpad can essentially be broken down into two core innovations that were essential to its success. Keep in mind that Breakpad's first use case was browsers, so the following innovations, and the Rust crates we'll be detailing later, might not exactly fit your use case.</p>
+<h3 id="consistent-generation">Consistent generation</h3>
+<p>Most modern platforms have some kind of crash dump format that can be natively created when the OS detects a program has crashed. For Linux/BSD this is the <a href="https://www.gabriel.urdhr.fr/2015/05/29/core-file/">ELF core format</a>, for Windows it's the <a href="https://docs.microsoft.com/en-us/windows/win32/debug/minidump-files">minidump</a>, and for Mac it's...I guess either a <code>.crash</code> or in 12+ a <code>.ips</code>, neither which seem to have official documentation. Missing or poor documentation is a running them in MacOS, as we'll see later.</p>
+<p>While each platform's format can be analyzed/inspected with tools <a href="https://docs.memfault.com/docs/mcu/coredump-elf-with-gdb/">native</a> to that system, and might even provide <a href="https://docs.microsoft.com/en-us/windows/win32/wer/about-wer">application error reporting</a> as an OS service, the platform specific nature of the formats presents a massive burden if you want to support many platforms and process crashes that come from them systematically. So Breakpad instead opted to consolidate on the <a href="https://docs.microsoft.com/en-us/windows/win32/debug/minidump-files">minidump</a> format for all the supported targets.</p>
+<p>The reasoning behind this, from the <a href="https://chromium.googlesource.com/breakpad/breakpad/+/master/docs/getting_started_with_breakpad.md">Breakpad docs</a> themselves, is straightforward.</p>
+<blockquote>
+<ul>
+<li>Core files can be very large, making them impractical to send across a network to the collector for processing. Minidumps are smaller, as they were designed to be used this way.</li>
+<li>The core file format is poorly documented. For example, the Linux Standards Base does not describe how registers are stored in PT_NOTE segments.</li>
+<li>It is harder to persuade a Windows machine to produce a core dump file than it is to persuade other machines to write a minidump file. (ie, creating a minidump on Windows is a simple matter of invoking <a href="https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump">MiniDumpWriteDump</a></li>
+<li>It simplifies the Breakpad processor to support only one file format.</li>
+</ul>
+</blockquote>
+<h3 id="consistent-analysis">Consistent analysis</h3>
+<p>Once a minidump has been reported to some kind of service, the problem becomes one of analysis, at least in the original browser use case of Breakpad. That is to say, browser maintainers are (generally) less concerned with actually <a href="https://docs.microsoft.com/en-us/windows/win32/dxtecharts/crash-dump-analysis#debugging-a-minidump-with-windbg">debugging</a> individual crashes themselves, but rather seeing high level information on a crash for grouping and triage purposes, principally provided by the stack trace for the thread that crashed, supplemented with other data that can be captured in a minidump.</p>
+<p>This unfortunately runs into the immediate problem of needing debug symbols. Minidumps themselves don't contain any symbol information (or rather, they can, but generally don't) as that would massively increase the size, as well as requiring that debug symbols are available on the machine where the crash occurred, which is generally avoided by most applications due to download and installation size, in addition to some application wanting to avoid giving out a wealth of information most users won't need, but <a href="https://www.unknowncheats.me/forum/battlefield-3-a/71032-bf3-pdb-836535-a.html">malicious actors</a> can take advantage of.</p>
+<p>This presents an even thornier issue than that of platform specific crash formats, as debug formats are vastly more complicated and even more poorly documented. So, again, Breakpad opted to use a <a href="https://chromium.googlesource.com/breakpad/breakpad/+/HEAD/docs/symbol_files.md">single format</a> that can be used to stackwalk and symbolicate a minidump, regardless of the source platform of the crash or the host platform of the processor. This format is vastly simpler and smaller than the native debug formats since it has the single goal of stack walking (in the case the binary has omitted <a href="https://docs.microsoft.com/en-us/cpp/build/reference/oy-frame-pointer-omission?view=msvc-170">frame pointers</a>) and symbolicating (mapping addresses to source information eg. file, function, and line).</p>
+<pre style="background-color:#282c34;">
+<code class="language-text" data-lang="text"><span style="color:#dcdfe4;">MODULE windows x86 5A9832E5287241C1838ED98914E9B7FF1 test_app.pdb
+FILE 1 c:\program files\microsoft visual studio 8\vc\platformsdk\include\winbase.h
+FILE 2 c:\program files\microsoft visual studio 8\vc\include\typeinfo
+FILE 3 c:\breakpad\trunk\src\common\windows\guid_string.h
+...
+FUNC 1000 13 4 vswprintf
+1000 0 50 71
+1000 12 51 71
+1012 1 52 71
+FUNC 1020 1b 10 wmemcpy_s
+1020 0 1230 66
+1020 1b 1233 66
+FUNC 1040 1b 10 wmemmove_s
+1040 0 1250 66
+1040 1b 1253 66
+FUNC 1060 19 4 std::bad_alloc::bad_alloc(char const *)
+1060 13 371 83
+1073 6 372 83
+FUNC 1080 b 0 std::bad_alloc::~bad_alloc()
+1080 6 380 83
+1086 5 381 83
+FUNC 1090 24 0 std::bad_alloc::`vector deleting destructor&#39;(unsigned int)
+FUNC 10c0 f 8 std::char_traits&lt;wchar_t&gt;::assign(wchar_t &amp;,wchar_t const &amp;)
+10c0 0 302 70
+10c0 e 303 70
+10ce 1 304 70
+...
+PUBLIC 23b06 0 __from_strstr_to_strchr
+FUNC 240b9 14 0 `operator new&#39;::`6&#39;::`dynamic atexit destructor for &#39;nomem&#39;&#39;
+STACK WIN 4 41b0 86 13 0 8 0 e0 0 1 $T0 $ebp = $eip $T0 4 + ^ = $ebp $T0 ^ = $esp $T0 8 + = $L $T0 .cbSavedRegs - = $P $T0 8 + .cbParams + =
+STACK WIN 4 4240 41 3 0 18 0 0 0 1 $T0 $ebp = $eip $T0 4 + ^ = $ebp $T0 ^ = $esp $T0 8 + = $L $T0 .cbSavedRegs - = $P $T0 8 + .cbParams + =
+STACK WIN 4 4290 18 4 0 0 0 4 0 1 $T0 $ebp = $eip $T0 4 + ^ = $ebp $T0 ^ = $esp $T0 8 + = $L $T0 .cbSavedRegs - = $P $T0 8 + .cbParams + =
+...
+</span></code></pre>
+<p>The Rust crates I'll be detailing are only concerned with the first part of creating crash dumps, but Rust has a <a href="https://github.com/rust-minidump/rust-minidump/tree/main/minidump-processor">rich</a> <a href="https://github.com/getsentry/symbolic">set</a> of crates for dealing with minidumps already.</p>
+<h2 id="why-not-just-use-breakpad-crashpad">Why not just...use Breakpad/Crashpad?</h2>
+<p>So this all seems fairly complicated, why could we not just use Breakpad from Rust? Well, we at Embark <a href="https://github.com/EmbarkStudios/sentry-contrib-rust/tree/main/breakpad-handler">did</a> for a while! And it was &quot;fine&quot;.</p>
+<p>However, I wanted to transition to use <a href="https://musl.libc.org/"><code>x86_64-unknown-linux-musl</code></a> on all of our services a while back, so that we could get smaller container images for faster deploys. It turned out that Breakpad was our sole C++ dependency for our services (well, most of them, one depends on...<a href="https://github.com/EmbarkStudios/physx-rs">physx</a> 😢), which is annoying when targeting <code>musl</code>. It's a solvable problem, but apparently (ok, this happens often for me) I hit it on day that made me <a href="https://perlbuzz.com/2008/02/15/annoyancedriven_development/">annoyed enough</a> to start porting the Linux code to Rust so that we could at least get rid of the Breakpad dependency for that one target, at least initially.</p>
+<p>I started doing the porting as a background task, and eventually ended up making a <a href="https://github.com/luser/rust-test-assembler/issues/12#issuecomment-960595876">comment</a> that saved me a <em>ton</em> of duplicated effort as it turned out folks at Mozilla were <a href="https://github.com/rust-minidump/minidump-writer">already working</a> on replacing (parts of) <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588530">Breakpad with Rust</a>!</p>
+<p>Not only were they already doing work in the area, but they had a more ambitious and nuanced set of reasons for doing this work than my initial &quot;C++ is annoying and I want to get rid of it&quot; that helped to inform the work I've been doing to this area recently. You can read Mozilla's documents around this area <a href="https://docs.google.com/document/d/15c5ir55tgqHOexdyh5l2w0EO8k5QGvd6EEs6SUslOks">here</a>, <a href="https://docs.google.com/document/d/1xtGnn27iZYukhYOoC_TWo8koKeHfWBbxE7cNtkgSSUg">here</a> and <a href="https://docs.google.com/document/d/198y2EgLkvWao0w31oVgOL9QiVKl8bEwBGM3g3hJTFQU">here</a>, but here's a rough summary.</p>
+<ul>
+<li>Breakpad is barely maintained. Google is still the primary contributor, and their efforts have mostly been focused on Crashpad, and while Crashpad does have some improvements over Breakpad, it's also vastly more complicated and even worse than Breakpad in certain aspects</li>
+<li>Breakpad is a very old (at least relative to most OS projects) codebase and includes a fair amount of code that is obsolete. For example, Apple has not supported PowerPC since MacOS 10.6, which was released over a decade ago, but Breakpad still has <a href="https://github.com/google/breakpad/blob/0808030bee8bc88a34675cd1dd83b965a2249a08/src/client/mac/handler/minidump_generator.cc#L638-L702">code</a> for it.</li>
+<li>Breakpad, as with most C++ projects, is essentially a monolith, which makes it difficult to integrate if you want to do something slightly different from how Breakpad wants things to be done. This is one of the aspects that Crashpad is even worse in, as, for example, it &quot;helpfully&quot; includes the actual sending of minidumps to a remote HTTP server, forcing a dependency on <code>OpenSSL</code> which we've explicitly <a href="https://github.com/EmbarkStudios/cargo-deny">banned</a> as we use <code>rustls</code> unilaterally. Also being a monolith, it includes <a href="https://github.com/google/breakpad/blob/0808030bee8bc88a34675cd1dd83b965a2249a08/src/common/md5.cc">bits of code</a> that in a Rust project would most likely be implemented in a crate shared with other pieces of your codebase.</li>
+</ul>
+<p>With those deficiencies in mind we can come up with a couple of high level goals for a rewrite.</p>
+<h3 id="modular">Modular</h3>
+<p>Rather than going the Breakpad/Crashpad route of having a single large project to integrate, perhaps <a href="https://github.com/google/breakpad/blob/0808030bee8bc88a34675cd1dd83b965a2249a08/src/client/linux/handler/exception_handler.h#L76-L114">giving basic control</a> over how crash handling is done, instead provide several crates, each focused on a specific aspect in this larger area that can be used together, or even independently.</p>
+<p>For example, you may want to catch crashes when they occur, but instead of creating a minidump, throw up a dialog saying you are very sorry before your program exits. Or maybe (like us at Embark), you want to report minidumps to <a href="https://sentry.io">Sentry</a> and include not only the minidump, but also the normal event data such as <a href="https://docs.sentry.io/product/issues/issue-details/breadcrumb">breadcrumbs</a> and <a href="https://docs.sentry.io/product/issues/issue-details/#tags">tags</a>.</p>
+<h3 id="clean">Clean</h3>
+<p>Being a rewrite of an older codebase, we get the opportunity to just ignore porting obsolete or redundant (when available in an existing Rust crate) pieces of code, reducing the size and complexity of the project. A lot of cruft has accumulated over the years in the Breakpad codebase, especially for platforms like MacOS for <em>reasons</em> I'll get to later.</p>
+<h2 id="implementation">Implementation</h2>
+<p>So now that we're porting Breakpad to Rust, what are the pieces that we actually need to have, as a minimal first pass implementation (ie, the current state of this effort)? To answer that question we actually need to decide on one critical detail for the crash handler, which is whether it supports <strong>in-process</strong> crash dumping (creating/sending a minidump in the same process that crashed), <strong>out-of-process</strong> crash dumping (creating/sending a minidump from a separate process than the one that crashed), or both.</p>
+<p>For context, Breakpad supports both in-process and out-of-process dumping, while Crashpad supports only out-of-process dumping. in-process has the advantage that it's <em>somewhat</em> easier to support as there is no need for process management or IPC communication, but comes at a severe disadvantage, notably that it is just not as reliable as out-of-process dumping. The reason for this is simply that, when a crash occurs, fairly complicated code needs to run to capture the state of a program. For some crashes, such as say, a <a href="https://docs.rs/sadness-generator/0.1.0/sadness_generator/enum.SadnessFlavor.html#variant.DivideByZero">divide by zero</a> on <code>x86_64</code>, capturing the program state will most likely be fine. However, this gets more complicated for things like segmentation faults, as the cause <em>might</em> be a simple dereference of a <code>null</code> pointer...but it could also be because some code has stomped over some memory, and while a crash has occurred now, there's no guarantee that other memory hasn't also been stomped, including really critical regions, such as, say, where your heap allocator maintains some state. Breakpad has a <a href="https://github.com/google/breakpad/blob/main/src/common/memory_allocator.h">non-trivial amount</a> of code on Linux and <a href="https://github.com/google/breakpad/blob/main/src/client/mac/handler/protected_memory_allocator.h">MacOS</a> to <em>try</em> to handle those kinds of severe scenarios, but the truth is that the more code you run in a crashing process, the more likely it is fail, regardless of the precautions and mitigations. And that's to say nothing of Windows.</p>
+<blockquote>
+<p>Minidumps for main process crashes are written in the crashed process, this is notoriously buggy on Windows. We’re missing crashes because of it. - <a href="https://docs.google.com/document/d/1xtGnn27iZYukhYOoC_TWo8koKeHfWBbxE7cNtkgSSUg">Mozilla</a></p>
+</blockquote>
+<p>I had initially started down the path of supporting in-process dumping as we had been using that already via our Breakpad wrapper, mainly due to convenience. Frankly, the code was kind of <a href="https://github.com/EmbarkStudios/sentry-contrib-rust/commit/7fedcbffd2230f8aaee41d35622ebf29221994d7">fun</a> to write (well <a href="https://github.com/EmbarkStudios/sentry-contrib-rust/commit/20c2883478818e341170b0cfc49141d203783dba#diff-281d2fdeea972facd303c135135513ec97b57d43ff8d5b1f244f85f9a0efef83R111-R113">mostly</a>, Rust still doesn't have <a href="https://github.com/rust-lang/rust/issues/32838">stable</a> <a href="https://github.com/EmbarkStudios/sentry-contrib-rust/commit/07373b7667764d58904ea981f80734743d6b6d85">Allocators</a> :sad:), however <a href="https://github.com/luser/rust-test-assembler/issues/12#issuecomment-963059409">reason</a> prevailed and I decided to go all in on out-of-process dumping. This means that in-process dumping is possible with the set of crates I'll be detailing, but is not going to be nearly as reliable, which is of course problematic for platforms that don't support process creation from user space (such as consoles).</p>
+<p>The implementation details we'll be talking about have been built and tested for Linux (Android compiles, but is untested), Windows, and MacOS. BSD should be able to be supported <em>fairly</em> easily as it shares a lot in common with both Linux and MacOS (PRs welcome!). iOS is...ugh. At Embark we don't actually care about iOS since its various platform and app restrictions make it impossible for us to release our Rust project on it, and it's also uninteresting to Mozilla because <a href="https://www.theregister.com/2022/04/26/apple_ios_browser/">reasons</a>, but again, PRs welcome!</p>
+<h3 id="crash-handler"><a href="https://github.com/EmbarkStudios/crash-handling/tree/main/crash-handler">crash-handler</a></h3>
+<p>The first component that we need is, well, a way to actually know when a crash has occurred! Each platform has its own special way to inform users of crashes or other exceptional events, but the crate provides a simple callback to the user when a crash occurs that is the same across platforms, other than that the actual <a href="https://docs.rs/crash-context/latest/crash_context/struct.CrashContext.html"><code>CrashContext</code></a> itself is platform specific.</p>
+<pre style="background-color:#282c34;">
+<code class="language-rust" data-lang="rust"><span style="color:#5c6370;">/// The result of the user code executed during a crash event
+</span><span style="color:#c678dd;">pub enum </span><span style="color:#dcdfe4;">CrashEventResult {
+    </span><span style="color:#5c6370;">/// The event was handled in some way
+</span><span style="color:#dcdfe4;">    Handled(</span><span style="color:#c678dd;">bool</span><span style="color:#dcdfe4;">),
+    #[</span><span style="color:#e06c75;">cfg</span><span style="color:#dcdfe4;">(</span><span style="color:#e06c75;">not</span><span style="color:#dcdfe4;">(target_os </span><span style="color:#c678dd;">= </span><span style="color:#98c379;">&quot;macos&quot;</span><span style="color:#dcdfe4;">))]
+    </span><span style="color:#5c6370;">/// The handler wishes to jump somewhere else, presumably to return
+    /// execution and skip the code that caused the crash
+</span><span style="color:#dcdfe4;">    Jump {
+        </span><span style="color:#5c6370;">/// The location to jump back to, retrieved via sig/setjmp
+</span><span style="color:#dcdfe4;">        jmp_buf: </span><span style="color:#c678dd;">*mut </span><span style="color:#dcdfe4;">jmp::JmpBuf,
+        </span><span style="color:#5c6370;">/// The value that will be returned from the sig/setjmp call that we
+        /// jump to. Note that if the value is 0 it will be corrected to 1
+</span><span style="color:#dcdfe4;">        value: </span><span style="color:#c678dd;">i32</span><span style="color:#dcdfe4;">,
+    },
+}
+
+</span><span style="color:#c678dd;">pub unsafe trait </span><span style="color:#dcdfe4;">CrashEvent: Send + Sync {
+    </span><span style="color:#5c6370;">/// Method invoked when a crash occurs.
+    </span><span style="color:#c678dd;">fn </span><span style="color:#61afef;">on_crash</span><span style="color:#dcdfe4;">(</span><span style="color:#c678dd;">&amp;</span><span style="color:#e06c75;">self</span><span style="color:#dcdfe4;">, </span><span style="color:#e06c75;">context</span><span style="color:#dcdfe4;">: </span><span style="color:#c678dd;">&amp;</span><span style="color:#dcdfe4;">CrashContext) -&gt; CrashEventResult;
+}
+</span></code></pre>
+<p>In addition, a method is provided to explicitly signal a crash to take advantage of the same flow and context information available when a real crash occurs, for cases in which a program wishes to capture its current state, for example, you might have application specific code that determines when it has entered a &quot;hung&quot; state that you might want to capture and report.</p>
+<h4 id="linux-and-bsd">Linux (and BSD)</h4>
+<ul>
+<li><code>SIGABRT</code></li>
+<li><code>SIGBUS</code></li>
+<li><code>SIGFPE</code></li>
+<li><code>SIGILL</code></li>
+<li><code>SIGSEGV</code></li>
+<li><code>SIGTRAP</code></li>
+</ul>
+<p>Linux sends <a href="https://man7.org/linux/man-pages/man7/signal.7.html">signals</a> to registered <a href="https://man7.org/linux/man-pages/man2/sigaction.2.html">signal handlers</a> when they are raised, either by the kernel, or by <a href="https://man7.org/linux/man-pages/man3/raise.3.html">user code</a>. Signal handling is...kind of complicated with various edge cases and caveats, and I've mostly relied on doing a straight port of the original Breakpad C code to Rust to handle these intricacies, as there are a few workarounds for dealing with <a href="https://github.com/EmbarkStudios/crash-handling/blob/42e32f6f2c86f7a551af54726891a4fdc902f43e/crash-handler/src/linux/state.rs#L148-L171">platform issues</a> and <a href="https://github.com/EmbarkStudios/crash-handling/blob/42e32f6f2c86f7a551af54726891a4fdc902f43e/crash-handler/src/linux/state.rs#L300-L332">buggy user code</a> that means we can save ourselves pain in the future.</p>
+<p>However, there is an additional wrinkle if we want to support users raising their own signals, and that wrinkle is named <a href="https://man7.org/linux/man-pages/man3/getcontext.3.html"><code>getcontext</code></a>. <code>getcontext</code> is a POSIX function that retrieves the CPU context (essentially, the register contents) for the calling thread, and it's been deprecated for over a decade. This means that libc implementations can just...not support it, and still be POSIX compliant, one of which is <a href="https://wiki.musl-libc.org/open-issues.html"><code>musl</code></a>. But while I was in the middle of implementing this stuff, Rust 1.59.0 dropped, which added stable support for <a href="https://blog.rust-lang.org/2022/02/24/Rust-1.59.0.html#inline-assembly">inline assembly</a>...so I just took a page from Breakpad/libunwind and added <a href="https://github.com/EmbarkStudios/crash-handling/tree/main/crash-context/src/linux">an implementation</a> sufficient for the needs of this project.</p>
+<p>There is also another major issue particular to signal handling, which is that, by default, signal handlers are called on the same stack where the crash occurred, which is problematic if that crash happens to be due to a <a href="https://en.wikipedia.org/wiki/Stack_buffer_overflow">stack overflow</a>. Specifically for this case, when registering a signal handler you can specify that they will use an <a href="https://man7.org/linux/man-pages/man2/sigaltstack.2.html">alternate stack</a> when handling a signal. Unfortunately, this is a per-thread attribute, meaning if a stack overflow occurs on a thread without an alternate signal stack installed, we'll miss the crash. However, we're in luck! Rust already <a href="https://github.com/rust-lang/rust/blob/a084b7ad35adb508bd2e053fc2a1b9a53df9536c/library/std/src/sys/unix/thread.rs#L106">installs</a> an <a href="https://github.com/rust-lang/rust/blob/33fd73fedeb5cd61dbbb7562fd927c0b6994653a/library/std/src/sys/unix/stack_overflow.rs">alternate stack</a> for every <a href="https://doc.rust-lang.org/std/thread/struct.Thread.html"><code>std::thread::Thread</code></a>, so we're good! I actually thought that as well, but then was helpfully reminded that <a href="https://github.com/EmbarkStudios/crash-handling/issues/4">we also need to handle threads created from non-Rust</a> code. Luckily Firefox already had a <a href="https://hg.mozilla.org/mozilla-central/file/3cf2b111807aec49c54bc958771177d33925aace/toolkit/crashreporter/pthread_create_interposer/pthread_create_interposer.cpp">simple</a> <a href="https://man7.org/linux/man-pages/man3/pthread_create.3.html"><code>pthread_create</code></a> <a href="https://www.geeksforgeeks.org/function-interposition-in-c-with-an-example-of-user-defined-malloc/">interposition</a> that I <a href="https://github.com/EmbarkStudios/crash-handling/blob/d48e8a94566180b36bce4024bf578bbed74e7674/crash-handler/src/unix/pthread_interpose.rs">ported to Rust</a>, with a small addition to support <a href="https://github.com/EmbarkStudios/crash-handling/blob/d48e8a94566180b36bce4024bf578bbed74e7674/crash-handler/src/unix/pthread_interpose.rs#L67-L70">musl</a>. This means that adding <code>crash-handler</code> as a dependency will automatically add an alternate signal stack for all threads, regardless of where they are created. I can also see how this is also a bit, shall we say, 👀, so I might end up putting this behind a feature flag if people are uncomfortable having the function interposition.</p>
+<h4 id="windows">Windows</h4>
+<p>Windows basically boils down to calling <a href="https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-setunhandledexceptionfilter"><code>SetUnhandledExceptionFilter</code></a> with a function you want to called whenever an exception/crash occurs, which is definitely a welcome simplicity after Linux.</p>
+<p>Breakpad also registers two other error handlers exclusive to Windows, which are <a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/set-invalid-parameter-handler-set-thread-local-invalid-parameter-handler?view=msvc-170"><code>_set_invalid_parameter_handler</code></a>, called when supplying invalid arguments to CRT (libc) functions eg. <code>printf(nullptr);</code>, and <a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/purecall?view=msvc-170"><code>_purecall</code></a>, called when C++ code tries to invoke a pure virtual function. The effort to support these was minimal so I ported them as well, even though Crashpad seemed to not think they were useful enough to support.</p>
+<p>There is one big difference from the original Breakpad code though, and that is that I opted (for now) not to support <strong>abort</strong> handling. On Windows there is limited support for signals, including <code>SIGABRT</code>, which is raised by eg <a href="https://en.cppreference.com/w/c/program/abort">abort</a> or <a href="https://en.cppreference.com/w/cpp/utility/program/abort">std::abort</a>. However, Rust's <a href="https://doc.rust-lang.org/std/process/fn.abort.html">std::process::abort</a> uses <a href="https://docs.microsoft.com/en-us/cpp/intrinsics/fastfail?view=msvc-170"><code>__fastfail</code></a> on Windows, which does not raise <code>SIGABRT</code>. This drastically reduces the usefulness of handling <code>SIGABRT</code> on Windows in a (primarily) Rust codebase, but it can be added easily in the future if needed.</p>
+<h4 id="macos">MacOS</h4>
+<ul>
+<li><code>EXC_BAD_ACCESS</code> = <code>SIGSEGV</code> | <code>SIGBUS</code></li>
+<li><code>EXC_BAD_INSTRUCTION</code> = <code>SIGILL</code></li>
+<li><code>EXC_ARITHMETIC</code> = <code>SIGFPE</code></li>
+<li><code>EXC_BREAKPOINT</code> = <code>SIGTRAP</code></li>
+<li><code>SIGABRT</code></li>
+</ul>
+<p>Being a Unix, one would assume that MacOS would also just use signals, and indeed, you can do just that. However, signals are not really the native way MacOS reports crash/exception events to user code, but rather a fallback mechanism that is used if the user hasn't registered interest via the native way, which are <a href="https://flylib.com/books/en/3.126.1.109/1/">exception ports</a>.</p>
+<p>This little section is where I am going to rant about Apple, and how they made doing the MacOS parts of the <code>crash-handler</code> and all of the other code that I will talk about in the rest of this post harder than it needed to be, in all of the wrong, non-fun ways. Feel free to <a href="https://jake-shadle.github.io/crash-reporting/#post-rant">skip this section</a>.</p>
+<p>🧂 <strong>/begin rant</strong> 🧂</p>
+<p>You may be thinking, &quot;why aren't you linking to Apple's official documentation for what exception ports are, or maybe the API specific documentation?&quot; And trust me, nothing would have made me happier than to link to official documentation similarly to what I've done for Linux and Windows above. The problem is that there is none.</p>
+<p>Now, to be clear, before I started porting the MacOS Breakpad code to Rust, I had managed to successfully dodge needing to know any Mac/Apple specifics because I've mostly worked in traditional (non-mobile) game development in my career, and therefore never worked on a project that targeted an Apple device, up until the project I work on now. I do manage our Apple CI machines, so I know that XCode fucking sucks, homebrew is terrible, and Apple's complete lack of support for virtualization would be laughable if it wasn't such a giant pain in the ass for literally every project that wants to have basic automation for Apple targets.</p>
+<p>For example, here is the official Apple &quot;API documentation&quot; for <a href="https://developer.apple.com/documentation/kernel/1538049-task_set_exception_ports"><code>task_set_exception_ports</code></a> which is the closest equivalent to Windows' <a href="https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-setunhandledexceptionfilter"><code>SetUnhandledExceptionFilter</code></a>.</p>
+<p align="center"><img src="task_set_exception_ports.png"/></p>
+<p>The first time I encountered this &quot;documentation&quot; I figured I had just been unlucky and stumbled upon the one function that Apple had neglected to document. Their kernel is large, mistakes can happen! But no, this turns out to actually be the rule for Apple's documentation, the exceptions are the ones that actually have <a href="https://developer.apple.com/documentation/kernel/1523490-vfs_fsadd">any</a> documentation at all.</p>
+<p>Now, at this moment, <a href="https://companiesmarketcap.com/apple/marketcap/">Apple's market capitalization</a> is <strong>$2.415 Trillion</strong> so obviously this is not due to lack of resources, but rather will. So let's give Apple the benefit of the doubt and assume that they don't want us to use these APIs because they're &quot;internal&quot;, maybe analogous to the undocumented <a href="http://undocumented.ntinternals.net/"><code>Nt*</code></a> functions in Windows, which Microsoft purposefully doesn't provide public documentation or support for so that they can change or remove them whenever they want, while still preserving their infamous backwards compatibility.</p>
+<p>Unfortunately this argument falls flat immediately due the nature of what Apple leaves undocumented, notably <a href="https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html">Mach ports</a>.</p>
+<p>Like I said before, I had basically no knowledge of MacOS specifics before doing this port, so it was an unpleasant shock to learn that Mach ports are essentially a core primitive of <a href="https://en.wikipedia.org/wiki/XNU">XNU</a>, with, AFAICT a <a href="https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/Mach/Mach.html">single high level overview</a> available from Apple. Mach ports back every process (task) and thread in MacOS, and are the IPC mechanism used to communicate between kernel and user space. <em>All</em> of the code that was ported to Rust relies on them and the functions that interact with them, <strong>none</strong> of which are documented, beyond reading the actual kernel source code, which is itself not well documented.</p>
+<p>Another argument that could be made would be that &quot;you're doing it wrong by using Rust/C instead of Objective-C/Swift, Apple wants you to use their preferred application language, those APIs are well documented and supported!&quot; Here is the documentation for <a href="https://developer.apple.com/documentation/foundation/nsuncaughtexceptionhandler?language=objc"><code>NSUncaughtExceptionHandler</code></a>. Wait let me save you the trouble of clicking</p>
+<blockquote>
+<p>No overview available.</p>
+</blockquote>
+<p>But wait, there is documentation for <a href="https://developer.apple.com/documentation/foundation/nsexception?language=objc"><code>NSException</code></a>! I'm fairly sure this cannot be used to catch actual crashes, but that's just a guess because even when Apple bothers to document their own APIs, they don't do it well, at least relative to, say Microsoft, a company that actually cares about documentation and developer experience (to a degree...<em>stares at Visual Studio</em>).</p>
+<p>But even <em>if</em> Swift or Objective-C exposed the APIs we need to catch crashes and write a minidump for them (AFAICT they don't)...why would the easy path be to use a different language to interface with a kernel written in C? This would be like Microsoft only documenting how to use <a href="https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-use-named-pipes-for-network-interprocess-communication">NamedPipes</a> if you used C#, but not via <a href="https://docs.microsoft.com/en-us/windows/win32/ipc/multithreaded-pipe-server">C</a>, which then makes it possible to use them via any language that can use FFI to call C code (ie, almost every non-toy language in existence).</p>
+<p>In conclusion, this means while doing the port I gleaned more useful information from <a href="https://fdiv.net/2019/08/17/making-mach-server">random blog posts</a> than from Apple's own documentation.</p>
+<div align="center">
+<pre style="background-color:#282c34;">
+<code class="language-text" data-lang="text"><span style="color:#dcdfe4;">______          _    _               _____          _                                  _             
+|  ___|        | |  (_)             |  ___|        | |                                (_)            
+| |_ _   _  ___| | ___ _ __   __ _  | |__ _ __ ___ | |__   __ _ _ __ _ __ __ _ ___ ___ _ _ __   __ _ 
+|  _| | | |/ __| |/ / | &#39;_ \ / _` | |  __| &#39;_ ` _ \| &#39;_ \ / _` | &#39;__| &#39;__/ _` / __/ __| | &#39;_ \ / _` |
+| | | |_| | (__|   &lt;| | | | | (_| | | |__| | | | | | |_) | (_| | |  | | | (_| \__ \__ \ | | | | (_| |
+\_|  \__,_|\___|_|\_\_|_| |_|\__, | \____/_| |_| |_|_.__/ \__,_|_|  |_|  \__,_|___/___/_|_| |_|\__, |
+                              __/ |                                                             __/ |
+                             |___/                                                             |___/ 
+</span></code></pre></div>
+<p>🧂 <strong>/end rant</strong> 🧂</p>
+<h4 id="post-rant">Post-rant</h4>
+<p>Wait, where were we? Oh right, exception ports.</p>
+<p>However, signals are not really the native way MacOS reports crash/exception events to user code, but rather a fallback mechanism that is used if the user hasn't registered interest via the native way, which are <a href="https://flylib.com/books/en/3.126.1.109/1/">exception ports</a>.</p>
+<p>We use <code>task_swap_exception_ports</code> to register a task level exception handler, which will receive an exception message if an <a href="https://github.com/EmbarkStudios/crash-handling/blob/42e32f6f2c86f7a551af54726891a4fdc902f43e/crash-handler/src/mac/state.rs#L29-L33">exception</a> we care about is thrown. This allows the crash-handler to be integrated with code that might already be using <a href="https://github.com/bytecodealliance/wasmtime/blob/c8f55ed688ad733dee333f23e51b108e0cb9b41b/crates/runtime/src/traphandlers/macos.rs">thread exception ports</a>, as ports are executed in the order of <code>thread</code> -&gt; <code>task</code> -&gt; <code>host</code>. If a port isn't registered at any level, the default exception port for a task is to convert the Mach exception to a Unix signal as mentioned previously, though at the loss of some information. This means that if there is code that <em>is</em> registering handlers for signals such as <code>SIGSEGV</code>, they <strong>won't be executed</strong> any longer as the exception ports take precedence, which might <a href="https://github.com/bytecodealliance/wasmtime/issues/2456">be a problem</a>.</p>
+<p>In addition, MacOS, much like Windows, does not have an exception for when user code aborts a process, so we register a single signal handler for <code>SIGABRT</code>, just as Breakpad does.</p>
+<p>One additional note is that since exceptions are delivered via ports, aka IPC, it is possible to register an exception port for an entirely different process and be notified when it crashes. I opted not to go this route to keep the MacOS implementation as close to the Linux and Windows one as I could, since there is already a lot of platform specifics going on without adding completely different code flows on top of it.</p>
+<h3 id="minidumper"><a href="https://github.com/EmbarkStudios/crash-handling/tree/main/minidumper">minidumper</a></h3>
+<p>As stated before, the focus, at least for this initial implementation pass, is on out-of-process crash handling. That means if we want to create a minidump, we need to communicate the crash context from the crashing process to separate process that can take care of those details.</p>
+<p>The <code>minidumper</code> crate was made to make that IPC communication between a crashing process and a monitor process fairly easy, providing a simple API to integrate into new or existing applications that want to catch and handle crashes. In <code>crash-handler</code> I hewed fairly closely to the original Breakpad code, but the IPC communication is wildly different for several reasons.</p>
+<h4 id="user-messages">User messages</h4>
+<p>In Breakpad, the IPC code is used for exactly 1 thing, the client (crashing process) requesting a minidump be generated by the server (monitor) process. This is the simplest approach, but is, for what we at Embark (and, I'm assuming, others) want out of a crash reporting mechanism, too simple.</p>
+<p>To reiterate, we use <a href="https://sentry.io">Sentry</a> as our error reporting solution. While it supports just sending minidumps and does the handling of them by symbolicating all the thread callstacks and pulling out eg. system information, there is a <em>much</em> richer set of details that we could provide that fall outside of the baseline information usually contained in a minidump, though that being said, minidumps are a flexible format with support for abitrary user data. One example of richer information that we would want to send along with a crash is <a href="https://docs.sentry.io/product/issues/issue-details/breadcrumbs/">breadcrumbs</a>. Breadcrumbs are essentially just the last <code>n</code> trace events, and can be incredibly useful for diagnosing issues. For example, our primary project is a frame-based application, which could mean that a crash's root cause might have been indicated by a (seemingly) innocuous warning message 1 or more frames previously than in the frame in which the crash actually occurred.</p>
+<p>And, going back to the <code>crash-handler</code>, it's recommended to do as <strong>little work</strong> as possible when handling a crash, which for us means that the monitor process is not only responsible for capturing the minidump, but also sending it to Sentry, so we want all of that additional information available in the monitor process at the time of the crash.</p>
+<p>Our scenario led me to believe that most projects that might want to integrate crash reporting would want some way to do something similar, sending application specific information to the crash monitor process so that in the eventuality of a crash, the minidump can be accompanied by richer and more detailed information.</p>
+<h4 id="ipc-implementation">IPC implementation</h4>
+<p>Each platform supported by Breakpad uses a platform-specific IPC mechanism: Linux uses <a href="https://en.wikipedia.org/wiki/Unix_domain_socket">Unix Domain Sockets</a>, Windows uses <a href="https://docs.microsoft.com/en-us/windows/win32/ipc/named-pipes">Named Pipes</a>, and MacOS uses (ugh) Mach ports.</p>
+<p>I started the port by targeting Linux so naturally the UDS method was kept, though slightly modified to use abstract addresses via the excellent <a href="https://docs.rs/uds/latest/uds/">uds</a> crate, which was all nice and easy.</p>
+<p>Then came Windows. 😢</p>
+<p>If you are <em>only</em> targeting Windows, Named Pipes are, I suppose, an <em>ok</em> way to do IPC. However, if you target anything else, they make sharing code between the targets practically impossible due their <em>wildly</em> different API compared to sockets or even files. My initial pass at supporting Windows used them, but there was a bug somewhere with polling and they weren't working correctly. I was already annoyed that the code was so different from the nice and simple UDS version, I decided to go an alternate route and just...use <a href="https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/">Unix Domain Sockets</a>! Unfortunately though, Windows doesn't support ancillary data, <code>SOCK_SEQPACKET</code>, nor abstract addresses like Linux. This comes at the cost of needing to create an actual file on disk and manually clean it up later, but gives us the benefit of a <em>much simpler</em> implementation that can share a bulk of the same code with Linux. It does come with the caveat that we've now limited support to <a href="https://blogs.windows.com/windows-insider/2017/12/19/announcing-windows-10-insider-preview-build-17063-pc/">Windows 10.17063+</a>, but that's over 4 years old at this point, and this is a greenfield project, so...</p>
+<pre style="background-color:#282c34;">
+<code class="language-rust" data-lang="rust"><span style="color:#c678dd;">match </span><span style="color:#e06c75;">self</span><span style="color:#dcdfe4;">.listener.</span><span style="color:#61afef;">accept_unix_addr</span><span style="color:#dcdfe4;">() {
+    Ok((accepted, _addr)) </span><span style="color:#c678dd;">=&gt; </span><span style="color:#dcdfe4;">{
+        </span><span style="color:#c678dd;">let</span><span style="color:#dcdfe4;"> key </span><span style="color:#c678dd;">=</span><span style="color:#dcdfe4;"> id;
+        id </span><span style="color:#c678dd;">+= </span><span style="color:#e5c07b;">1</span><span style="color:#dcdfe4;">;
+
+        poll.</span><span style="color:#61afef;">add</span><span style="color:#dcdfe4;">(</span><span style="color:#c678dd;">&amp;</span><span style="color:#dcdfe4;">accepted, Event::readable(key))</span><span style="color:#c678dd;">?</span><span style="color:#dcdfe4;">;
+
+        log::debug</span><span style="color:#c678dd;">!</span><span style="color:#dcdfe4;">(</span><span style="color:#98c379;">&quot;accepted connection {}&quot;</span><span style="color:#dcdfe4;">, key);
+        clients.</span><span style="color:#61afef;">push</span><span style="color:#dcdfe4;">(ClientConn {
+            socket: accepted,
+            key,
+            #[</span><span style="color:#e06c75;">cfg</span><span style="color:#dcdfe4;">(target_os </span><span style="color:#c678dd;">= </span><span style="color:#98c379;">&quot;macos&quot;</span><span style="color:#dcdfe4;">)]
+            pid: None,
+        });
+
+        </span><span style="color:#c678dd;">if</span><span style="color:#dcdfe4;"> handler.</span><span style="color:#61afef;">on_client_connected</span><span style="color:#dcdfe4;">(clients.</span><span style="color:#61afef;">len</span><span style="color:#dcdfe4;">()) </span><span style="color:#c678dd;">== </span><span style="color:#dcdfe4;">LoopAction::Exit {
+            log::debug</span><span style="color:#c678dd;">!</span><span style="color:#dcdfe4;">(</span><span style="color:#98c379;">&quot;on_client_connected exited message loop&quot;</span><span style="color:#dcdfe4;">);
+            </span><span style="color:#c678dd;">return </span><span style="color:#dcdfe4;">Ok(());
+        }
+    }
+    Err(err) </span><span style="color:#c678dd;">=&gt; </span><span style="color:#dcdfe4;">{
+        log::error</span><span style="color:#c678dd;">!</span><span style="color:#dcdfe4;">(</span><span style="color:#98c379;">&quot;failed to accept socket connection: {}&quot;</span><span style="color:#dcdfe4;">, err);
+    }
+}
+
+</span><span style="color:#5c6370;">// We need to reregister interest every time
+</span><span style="color:#dcdfe4;">poll.</span><span style="color:#61afef;">modify</span><span style="color:#dcdfe4;">(</span><span style="color:#c678dd;">&amp;</span><span style="color:#e06c75;">self</span><span style="color:#dcdfe4;">.listener, Event::readable(</span><span style="color:#e5c07b;">0</span><span style="color:#dcdfe4;">))</span><span style="color:#c678dd;">?</span><span style="color:#dcdfe4;">;
+</span></code></pre>
+<p>Following this nice win on Windows, I foolishly assumed that MacOS would be even easier, but as we've learned, MacOS is a giant pain the ass, and it doesn't disappoint here either. I got UDS working on MacOS, and was catching crashes and successfully generating minidumps for them in the <a href="https://github.com/EmbarkStudios/crash-handling/tree/42e32f6f2c86f7a551af54726891a4fdc902f43e/minidumper-test">minidumper tests</a>, nice! Then I integrated my changes into our project and emitted a few crash dumps to Sentry for sanity checking and immediately noticed the crash reports were...not good.</p>
+<p align="center"><img src="bad_macos_crash.png"/></p>
+<p>I assumed that I had done something wrong in the minidump writing and started adding some diagnostic code and extra validation to try and figure out what was going on, but nothing really stood out. I can't remember exactly how long I spent trying to figure this out but I eventually added enough diagnostic code to turn up something odd, <code>mach_task_self</code>, which is used to get the id of the current task similar to <code>std::process::id</code> is used to get the PID of the process, was returning the same ID in both the process that crashed, and the process that was generating the minidump.</p>
+<p>WTF.</p>
+<p>Now, people who have knowledge about MacOS are probably thinking, &quot;you idiot, of course that's not how <code>mach_task_self</code> works!&quot;, but in my defense, Apple sucks, as, &quot;fun fact&quot;, <code>mach_task_self</code> is not even listed on <a href="https://developer.apple.com/search/?q=mach_task_self">Apple's &quot;documentation&quot;</a>, not that it matters, since we all know they wouldn't have actually had any documentation for it. I needed to find this random snippet from <a href="https://books.google.se/books?id=K8vUkpOXhN4C&amp;pg=PA577&amp;lpg=PA577&amp;dq=mach_task_self&amp;source=bl&amp;ots=ONmhYW_s1D&amp;sig=ACfU3U30VoOBwZ1ILTEzVBChP9BMgTsgJw&amp;hl=en&amp;sa=X&amp;ved=2ahUKEwj_zpSulOv3AhVjkosKHSPLAqoQ6AF6BAgfEAM#v=onepage&amp;q=mach_task_self&amp;f=false">Mac OS X Internals</a> to see that I had misunderstood the API.</p>
+<blockquote>
+<p>The value returned from <code>task_self_trap()</code> is not a unique identifier like a Unix process ID. In fact, its value will be the same for all tasks, even on different machines, provided the machines are running identical kernels.</p>
+</blockquote>
+<p>So it turns out my simplification to completely replace the Mach ports IPC with UDS was fundamentally flawed. The Mach IPC code is not only doing transmission, it's also <a href="https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/">checking permissions</a> and, most importantly, converting port identifiers to be...actually useful when used by another process. While I <em>think</em> it is probably possible to do all of this in userspace, I was too irritated to want to spend more time on this figuring out stupid issues that could be easily avoided if not for Apple's laziness and condescension, so I just opted for the rather ugly solution of</p>
+<p align="center"><img src="https://media.giphy.com/media/3o85xIO33l7RlmLR4I/giphy.gif"/></p>
+<p>This means that any user messages are sent via the regular socket just the same as Linux and Windows, but when sending a crash context, we fallback to using <code>mach_msg</code> (why did Apple feel that using a single function for both sending and receiving was a good idea, and don't even get me started on MIG). This makes the code significantly uglier, but it does work!</p>
+<p align="center"><img src="good_macos_crash.png"/></p>
+<p>I <em>believe</em> it will be possible to remove this ugliness in the future after my tolerance for Apple's ~bullshit~ carelessness has increased (or some kind person who knows MacOS sends a PR!), but for now, it works.</p>
+<h3 id="minidump-writer"><a href="https://github.com/rust-minidump/minidump-writer">minidump-writer</a></h3>
+<p>The final big piece that we need to bring this all together is, well, the actual minidump generation. As previously stated, since minidumps are the native format for Windows, the Windows implementation is <em>basically</em> just a single call.</p>
+<pre style="background-color:#282c34;">
+<code class="language-rust" data-lang="rust"><span style="color:#5c6370;">// Write the actual minidump
+// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
+// SAFETY: syscall
+</span><span style="color:#c678dd;">let</span><span style="color:#dcdfe4;"> ret </span><span style="color:#c678dd;">= unsafe </span><span style="color:#dcdfe4;">{
+    md::MiniDumpWriteDump(
+        </span><span style="color:#e06c75;">self</span><span style="color:#dcdfe4;">.crashing_process, </span><span style="color:#5c6370;">// HANDLE to the process with the crash we want to capture
+        </span><span style="color:#e06c75;">self</span><span style="color:#dcdfe4;">.crashing_pid,     </span><span style="color:#5c6370;">// process id
+</span><span style="color:#dcdfe4;">        destination.</span><span style="color:#61afef;">as_raw_handle</span><span style="color:#dcdfe4;">() </span><span style="color:#c678dd;">as </span><span style="color:#e5c07b;">HANDLE</span><span style="color:#dcdfe4;">, </span><span style="color:#5c6370;">// file to write the minidump to
+        </span><span style="color:#dcdfe4;">md::MiniDumpNormal,    </span><span style="color:#5c6370;">// MINIDUMP_TYPE - we _might_ want to make this configurable
+</span><span style="color:#dcdfe4;">        exc_info
+            .</span><span style="color:#61afef;">as_ref</span><span style="color:#dcdfe4;">()
+            .</span><span style="color:#61afef;">map_or</span><span style="color:#dcdfe4;">(std::ptr::null(), |</span><span style="color:#e06c75;">ei</span><span style="color:#dcdfe4;">| ei </span><span style="color:#c678dd;">as *const _</span><span style="color:#dcdfe4;">), </span><span style="color:#5c6370;">// exceptionparam - the actual exception information
+        </span><span style="color:#c678dd;">&amp;</span><span style="color:#dcdfe4;">user_stream_infos, </span><span style="color:#5c6370;">// user streams
+        </span><span style="color:#dcdfe4;">std::ptr::null(),   </span><span style="color:#5c6370;">// callback, unused
+    </span><span style="color:#dcdfe4;">)
+};
+</span></code></pre>
+<p>Other platforms are....slightly more complicated.</p>
+<p>Minidumps are kind of a general container format, with multiple different streams of information that are (mostly) isolated from each other. Essentially, what each non-Windows platform needs to do to fill out information in a minidump is to inspect the state of the process, similarly to a debugger. For Linux this is mostly done with <a href="https://man7.org/linux/man-pages/man2/ptrace.2.html"><code>ptrace</code></a>, and for MacOS it's (shocking!) a bunch of undocumented APIs. Luckily the Breakpad authors have already done the hard work of writing a C++ implementation that we can mostly directly port from.</p>
+<h4 id="modules"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.ModuleListStream">Modules</a></h4>
+<p>This stream contains a list of <a href="https://docs.rs/minidump-common/latest/minidump_common/format/struct.MINIDUMP_MODULE.html">MINDUMP_MODULE</a>, 1 for each dynamically loaded library in the process. Each module contains a few pieces of critical information that is needed to make other streams useful during analysis.</p>
+<ul>
+<li><code>base + size</code> - The load address information is used during symbolication to know which instruction address corresponds to which module</li>
+<li><code>cv_record</code> - The <a href="https://docs.rs/debugid/latest/debugid/struct.DebugId.html">debug identifier</a> for the module. This is how a minidump processor can retrieve the debug symbols associated with a module to symbolicate an instruction address to get its source information eg file, function, and line</li>
+<li><code>name</code> - The human readable name of the dynamic library. This is not strictly needed, but nice to have.</li>
+</ul>
+<h4 id="threads"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.ThreadListStream">Threads</a></h4>
+<p>A list of <a href="https://docs.rs/minidump-common/latest/minidump_common/format/struct.MINIDUMP_THREAD.html">MINIDUMP_THREAD</a>, 1 for each of the currently running threads in the crashed process. Each thread contains two important pieces of information, the CPU context, ie register state, of the thread, and a block of the thread's stack memory. This information can be used by a minidump processor to generate a stack trace for each thread, possibly symbolicating each stack frame if debug symbols are available.</p>
+<h4 id="memory"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.MemoryListStream">Memory</a></h4>
+<p>This is a stream for storage of raw blocks of memory that can be referenced by other streams. This is currently only used for the thread stack memory on MacOS, but on Linux is additionally used if an application wants to add its own blocks of memory.</p>
+<h4 id="exception"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.ExceptionStream">Exception</a></h4>
+<p>This is the stream that contains the actual high level metadata for cause of the crash, like the signal, exception code, fault address etc.</p>
+<h4 id="systeminfo"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.SystemInfoStream">SystemInfo</a></h4>
+<p>This stream contains various bits of system information such as CPU details and the OS/kernel version.</p>
+<h4 id="miscinfo"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.MiscInfoStream">MiscInfo</a></h4>
+<p>The stream where things that weren't part of the original implementation gets shoved into, as shown by the fact this has 5 different versions at the time of writing. This can include information like process uptime and (oddly) the CPU frequency, even though one would think that would be part of the aforementioned SystemInfo. 🤷</p>
+<h4 id="breakpadinfo"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.BreakpadInfoStream">BreakpadInfo</a></h4>
+<p>This stream was added by Breakpad to make processing minidumps easier, it just contains the thread ids of the thread that the crash occurred in, and thread id of the thread that handled the crash, so that processors can de-prioritize (or even ignore) the handler thread to simplify the crash report.</p>
+<p>This is really only used by MacOS as the handler thread is always distinct from the crashing thread, but can also be useful on Windows if you happen to be doing in-process crash dumping (please don't).</p>
+<h4 id="threadnamestream"><a href="https://docs.rs/minidump-common/latest/minidump_common/format/enum.MINIDUMP_STREAM_TYPE.html#variant.ThreadNamesStream">ThreadNameStream</a></h4>
+<p>This stream is <a href="https://randomascii.wordpress.com/2015/10/26/thread-naming-in-windows-time-for-something-better/">incredibly useful</a> as it pairs each thread in the <a href="https://jake-shadle.github.io/crash-reporting/#Threads">Threads</a> stream with the <a href="https://doc.rust-lang.org/std/thread/struct.Builder.html#method.name">user-specified thread name</a>.</p>
+<p>Unfortunately, this stream is not currently being written on MacOS as Breakpad doesn't do it either, but it's <a href="https://github.com/rust-minidump/minidump-writer/issues/23"><em>hopefully</em> possible</a> to do?</p>
+<h4 id="linux-streams">Linux Streams</h4>
+<p>Linux is far more fleshed out than MacOS, both in the new Rust code and original Breakpad code, since it's so much easier to retrieve information and have <em>some</em> documentation or existing code to work with on Linux, but this is definitely an area where I think the Rust crate can improve on top of the original Breakpad implementation to provide more information. Unfortunately it's dependent on having a high tolerance for MacOS...PRs welcome! 😅</p>
+<h3 id="crash-context"><a href="https://crates.io/crates/crash-context">crash-context</a></h3>
+<p>Like the name suggests, this crate provides types for the platform specific crash context, allowing all of the previously discussed crates easily interoperate with each other, if so desired. This crate is also where the portable <code>getcontext</code> implementation for Linux is located, and the <a href="https://github.com/EmbarkStudios/crash-handling/blob/42e32f6f2c86f7a551af54726891a4fdc902f43e/crash-context/src/mac/ipc.rs">MacOS specific IPC</a> implementation for transferring a crash context between processes.</p>
+<h3 id="sadness-generator"><a href="https://docs.rs/sadness-generator/latest/sadness_generator/">sadness-generator</a></h3>
+<p>This is a fun little crate I used while testing that just provides different ways to crash a program. I published it in case it might be useful for other people, but mostly because I liked the name.</p>
+<h2 id="next-steps">Next steps</h2>
+<p>This is still really early days, so in the immediate term most work will probably be simple bug fixes and fleshing out the implementation for some targets such as Android, but ambitious contributors are welcome to eg. add thread name support to MacOS or BSD* support!</p>
+<p>That being said we've already integrated these crates into our main Rust project at Embark as a way for me to dogfood the implementation and it's already better than the Breakpad solution we were using before, as it is mostly on par in terms of implementation, but with 100% less C++! So I guess I would <em>tentatively</em> say that you can start trying to use one or more crates in this project if you want to handle crashes and target one or more of the currently supported targets, but uhh...probably not in a production environment just yet.</p>
+<h2 id="thanks">Thanks</h2>
+<p>Obviously a huge amount of thanks goes to the Breakpad and Crashpad projects and the people who have contributed to them for doing all of the hard work of designing the original implementations and figuring out the gritty details platform details for handling and capturing crashes.</p>
+<p>Also huge thanks to <a href="https://github.com/Gankra">@Gankra</a>, <a href="https://github.com/gabrielesvelto">@gabrielesvelto</a>, <a href="https://github.com/msirringhaus">@msirringhaus</a>, <a href="https://github.com/marti4d">@marti4d</a>, <a href="https://github.com/luser">@luser</a>, and the folks at Sentry for reviewing PRs, filing issues, providing additional feedback and discussion, and also implementation work, for example <a href="https://github.com/msirringhaus">@msirringhaus</a> is responsible for basically all of the Linux crash dump writing implementation. And of course a lot of the work that has already been done crates such as <a href="https://github.com/rust-minidump/rust-minidump/tree/4a60e95fd1fceda67aa61cef85461d65457ab046/minidump-common">minidump-common</a>.</p>
+
+                            </div>
+                        </div>
+                        
+                        
+<footer class="card-footer">
+    <div class="article-footer">
+        <div class="columns is-multiline">
+            <div class="column is-12">
+                <p>
+                    Published
+                    
+
+<time datetime="2022-05-23">
+    2022-05-23
+</time>
+
+
+                    
+
+
+                    
+
+
+in <a href="https://jake-shadle.github.io/categories/code/">
+    <span class="tag is-success">
+        code
+    </span>
+</a>
+
+
+                    
+
+and tagged
+
+<a href="https://jake-shadle.github.io/tags/linux/">
+    <span class="tag is-link">linux </span>
+</a>
+
+
+
+,
+
+
+
+
+<a href="https://jake-shadle.github.io/tags/android/">
+    <span class="tag is-link">android </span>
+</a>
+
+
+
+,
+
+
+
+
+<a href="https://jake-shadle.github.io/tags/windows/">
+    <span class="tag is-link">windows </span>
+</a>
+
+
+
+,
+
+
+
+
+<a href="https://jake-shadle.github.io/tags/macos/">
+    <span class="tag is-link">macos </span>
+</a>
+
+
+
+,
+
+
+
+
+<a href="https://jake-shadle.github.io/tags/sentry/">
+    <span class="tag is-link">sentry </span>
+</a>
+
+
+
+and
+
+
+
+
+<a href="https://jake-shadle.github.io/tags/rust/">
+    <span class="tag is-link">rust </span>
+</a>
+
+
+
+
+
+
+                </p>
+            </div>
+            <div class="column">
+                <a class="button is-pulled-right is-info" href="/">Back Home</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+                        
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+
+    
+    
+
+
+    
+
+    <script type="text/javascript" src="https:&#x2F;&#x2F;jake-shadle.github.io&#x2F;js&#x2F;zulma_navbar.js"></script>
+
+    
+
+    
+</body>
+
+</html>

@@ -19,6 +19,10 @@
         <loc>https://jake-shadle.github.io/categories/meta/page/1/</loc>
     </url>
     <url>
+        <loc>https://jake-shadle.github.io/crash-reporting/</loc>
+        <lastmod>2022-05-23</lastmod>
+    </url>
+    <url>
         <loc>https://jake-shadle.github.io/first/</loc>
         <lastmod>2016-09-28</lastmod>
     </url>
@@ -29,16 +33,34 @@
         <loc>https://jake-shadle.github.io/tags/</loc>
     </url>
     <url>
+        <loc>https://jake-shadle.github.io/tags/android/</loc>
+    </url>
+    <url>
+        <loc>https://jake-shadle.github.io/tags/android/page/1/</loc>
+    </url>
+    <url>
         <loc>https://jake-shadle.github.io/tags/linux/</loc>
     </url>
     <url>
         <loc>https://jake-shadle.github.io/tags/linux/page/1/</loc>
     </url>
     <url>
+        <loc>https://jake-shadle.github.io/tags/macos/</loc>
+    </url>
+    <url>
+        <loc>https://jake-shadle.github.io/tags/macos/page/1/</loc>
+    </url>
+    <url>
         <loc>https://jake-shadle.github.io/tags/rust/</loc>
     </url>
     <url>
         <loc>https://jake-shadle.github.io/tags/rust/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://jake-shadle.github.io/tags/sentry/</loc>
+    </url>
+    <url>
+        <loc>https://jake-shadle.github.io/tags/sentry/page/1/</loc>
     </url>
     <url>
         <loc>https://jake-shadle.github.io/tags/windows/</loc>
